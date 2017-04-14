@@ -11,6 +11,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 /**
+ *
  * Created by guanzhihao on 2016/2/16.
  */
 public class SmsReceiver extends BroadcastReceiver {
@@ -32,16 +33,20 @@ public class SmsReceiver extends BroadcastReceiver {
                 default:
                     break;
             }
-//            context.startService(MessionService.getSendSmsResultIntent(context, result));
+            context.startService(SmsService.getSendSmsResultIntent(context, result));
         }else {
             Log.i("mession", "sms--检测收到短信");
             Bundle bundle = intent.getExtras();
-            SmsMessage msg = null;
+            SmsMessage msg;
             String number = "";
             String content = "";
             if (null != bundle) {
                 Object[] smsObj = (Object[]) bundle.get("pdus");
+                if (smsObj == null){
+                    return;
+                }
                 for (Object object : smsObj) {
+                    //noinspection deprecation
                     msg = SmsMessage.createFromPdu((byte[]) object);
                     number = msg.getOriginatingAddress();
                     content += msg.getDisplayMessageBody();

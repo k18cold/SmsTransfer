@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">SmsTransfer</string>
+    <string name="auto_transfer">转发到号码:</string>
+    <string name="rule">规则</string>
+    <string name="transfer_by_number">匹配来电号码:</string>
+    <string name="transfer_by_content">匹配来电内容:</string>
 </resources>
