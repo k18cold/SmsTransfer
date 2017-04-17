@@ -143,4 +143,20 @@ public class Sms implements Parcelable {
             return new Sms[size];
         }
     };
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Sms sms = (Sms) o;
+
+        return time == sms.time;
+
+    }
+
+    @Override
+    public int hashCode() {
+        return (int) (time ^ (time >>> 32));
+    }
 }

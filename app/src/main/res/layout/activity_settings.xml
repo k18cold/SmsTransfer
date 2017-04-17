@@ -71,6 +71,34 @@
             android:layout_height="wrap_content"/>
     </RelativeLayout>
 
+    <RadioGroup
+        android:id="@+id/rg"
+        android:layout_margin="@dimen/tilte_margin"
+        android:orientation="horizontal"
+        android:weightSum="3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <android.support.v7.widget.AppCompatRadioButton
+            android:id="@+id/rb_or"
+            android:text="@string/or"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"/>
+
+        <android.support.v7.widget.AppCompatRadioButton
+            android:layout_weight="1"
+            android:id="@+id/rb_and"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/and"/>
+        <android.support.v7.widget.AppCompatRadioButton
+            android:layout_weight="1"
+            android:id="@+id/rb_all"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/all"/>
+    </RadioGroup>
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">

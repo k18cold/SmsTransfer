@@ -14,6 +14,7 @@ public class Contants {
     public static final String KEY_SEND_NUMBER = "key_send_number";
     public static final String KEY_FROM_NUMBER = "key_from_number";
     public static final String KEY_FROM_CONTENT = "key_from_content";
+    public static final String KEY_GROUP = "key_group";
     public static final String SP_FILE_CONFIG = "config";
 
     public static ConfigBean getConfigFromSp(SpManager spManager){
@@ -25,6 +26,8 @@ public class Contants {
         String fn = spManager.getString(Contants.KEY_FROM_NUMBER, "");
         String fc = spManager.getString(Contants.KEY_FROM_CONTENT, "");
 
+        int group = spManager.getInt(KEY_GROUP, 0);
+
         ConfigBean bean = new ConfigBean();
         bean.setTransferOn(sns);
         bean.setRgxNumberOn(fns);
@@ -32,6 +35,7 @@ public class Contants {
         bean.setTransferNumber(sn);
         bean.setRgxNumber(fn);
         bean.setRgxContent(fc);
+        bean.setGroup(group);
         return bean;
     }
 
@@ -43,5 +47,6 @@ public class Contants {
         instance.saveString(KEY_SEND_NUMBER, bean.getTransferNumber());
         instance.saveString(KEY_FROM_NUMBER, bean.getRgxNumber());
         instance.saveString(KEY_FROM_CONTENT, bean.getRgxContent());
+        instance.saveInt(KEY_GROUP, bean.getGroup());
     }
 }

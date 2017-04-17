@@ -4,4 +4,7 @@
     <string name="rule">规则</string>
     <string name="transfer_by_number">匹配来电号码:</string>
     <string name="transfer_by_content">匹配来电内容:</string>
+    <string name="or">或者(Or)</string>
+    <string name="and">并且(And)</string>
+    <string name="all">转发所有</string>
 </resources>

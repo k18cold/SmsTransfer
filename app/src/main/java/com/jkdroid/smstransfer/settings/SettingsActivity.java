@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.Window;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.RadioGroup;
 
 import com.jkdroid.smstransfer.MyActivity;
 import com.jkdroid.smstransfer.R;
@@ -26,7 +27,7 @@ public class SettingsActivity extends MyActivity implements SettingsContracts.Vi
     EditText mEtAutoTransfer;
     EditText mEtNumber;
     EditText mEtContent;
-
+    private RadioGroup mRadioGroup;
     private SettingsContracts.Precenter mPrecenter;
 //    @Override
     protected void onCreateAfter(Bundle bundle) {
@@ -45,6 +46,7 @@ public class SettingsActivity extends MyActivity implements SettingsContracts.Vi
                 onBackBtnClick();
             }
         });
+        mRadioGroup = (RadioGroup) findViewById(R.id.rg);
     }
 
     @Override
@@ -91,6 +93,8 @@ public class SettingsActivity extends MyActivity implements SettingsContracts.Vi
         mEtAutoTransfer.setText(bean.getTransferNumber());
         mEtNumber.setText(bean.getRgxNumber());
         mEtContent.setText(bean.getRgxContent());
+        mRadioGroup.check(bean.getGroup() == 0 ? R.id.rb_or :
+                bean.getGroup() == 1 ? R.id.rb_and : R.id.rb_all);
     }
 
     @Override
@@ -104,12 +108,15 @@ public class SettingsActivity extends MyActivity implements SettingsContracts.Vi
         String fn = mEtNumber.getText().toString().trim();
         String fc = mEtContent.getText().toString().trim();
 
+        int group = mRadioGroup.getCheckedRadioButtonId() == R.id.rb_or ? 0 :
+                (mRadioGroup.getCheckedRadioButtonId() == R.id.rb_and ? 1 : -1);
         bean.setTransferOn(sns);
         bean.setRgxNumberOn(fns);
         bean.setRgxContentOn(fcs);
         bean.setTransferNumber(sn);
         bean.setRgxNumber(fn);
         bean.setRgxContent(fc);
+        bean.setGroup(group);
         return bean;
     }
 

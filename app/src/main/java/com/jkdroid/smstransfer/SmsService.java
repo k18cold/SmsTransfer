@@ -10,7 +10,6 @@ import android.util.Log;
 
 import com.jkdroid.core.manager.SpManager;
 import com.jkdroid.core.util.PhoneUtils;
-import com.jkdroid.core.util.ToastUtils;
 import com.jkdroid.smstransfer.bean.ConfigBean;
 import com.jkdroid.smstransfer.bean.Contants;
 import com.jkdroid.smstransfer.dao.MySmsDao;
@@ -20,8 +19,15 @@ import com.jkdroid.smstransfer.home.HomeActivity;
 
 import java.util.LinkedList;
 
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
+
 /**
- * 
+ *
  * Created by alan on 2017/4/6.
  */
 
@@ -61,42 +67,17 @@ public class SmsService extends Service {
                     parcelableExtra = intent.getParcelableExtra(KEY_RECEIVED);
                     if (parcelableExtra != null && parcelableExtra instanceof Sms) {
                         Sms smsBean = intent.getParcelableExtra(KEY_RECEIVED);
-                        if (mConfigBean == null) {
-                            mConfigBean = Contants.getConfigFromSp(SpManager.getInstance(this.getApplicationContext(), Contants.SP_FILE_CONFIG));
-                        }
-                        boolean needTransfer = needTransfer(smsBean) && PhoneUtils.checkSIM(this);
-                        if (BuildConfig.DEBUG){
-                            needTransfer = true;
-                        }
-                        if (needTransfer) {
-                            if (!BuildConfig.DEBUG){
-                                PhoneUtils.sendSMS(this, mConfigBean.getTransferNumber(), smsBean.getContent());
-                            }
-                            if (mSmsDao == null) {
-                                mSmsDao = new MySmsDaoImpl();
-                            }
-                            mIds.push(mSmsDao.insertSms(smsBean));
-                            HomeActivity.sendUpdateSmsBroadcast(getApplicationContext(), smsBean);
-                        }
+                        onReceiveSms(smsBean);
 //                        Log.i(SmsService.TAG, "trans:" + needTransfer + "," + smsBean.toString());
 //                        ToastUtils.showLongImmediately(this, "trans:" + needTransfer);
                     }
                     break;
                 case ACTION_SEND_SMS_RESULT:
                     boolean result = intent.getBooleanExtra("result", false);
-                    if (result) {
-                        ToastUtils.showLongImmediately(this, "send-succeed");
-                    }
-                    //TODO 改写数据库
-                    if (!mIds.isEmpty()){
-                        Long id = mIds.pop();
-                        Sms sms = mSmsDao.querySmsById(id);
-                        if (sms != null){
-                            sms.setResult(result ? 1 : -1);
-                            mSmsDao.insertOrUpdateSms(sms);
-                            HomeActivity.sendUpdateSmsBroadcast(getApplicationContext(), sms);
-                        }
-                    }
+//                    if (result) {
+//                        ToastUtils.showLongImmediately(this, "send-succeed");
+//                    }
+                    onReceiveResult(result);
                     break;
                 default:
                     break;
@@ -105,16 +86,91 @@ public class SmsService extends Service {
         return Service.START_STICKY;
     }
 
+    private void onReceiveResult(final boolean result) {
+        Log.i("result", "onReceiveResult is "+result);
+        if (mIds.isEmpty()) {
+            return;
+        }
+        io.reactivex.Observable.create(new ObservableOnSubscribe<Sms>() {
+            @Override
+            public void subscribe(ObservableEmitter<Sms> e) throws Exception {
+                Long id = mIds.pop();
+                Sms sms = mSmsDao.querySmsById(id);
+                if (sms != null) {
+                    sms.setResult(result ? 1 : -1);
+                    mSmsDao.insertOrUpdateSms(sms);
+                    e.onNext(sms);
+                }else {
+                    e.onError(new Throwable("sms is null"));
+                }
+                e.onComplete();
+            }
+        })
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(new Consumer<Sms>() {
+            @Override
+            public void accept(Sms sms) throws Exception {
+                HomeActivity.sendUpdateSmsBroadcast(getApplicationContext(), sms);
+            }
+        });
+    }
+
+    private void onReceiveSms(final Sms smsBean) {
+        if (mConfigBean == null) {
+            mConfigBean = Contants.getConfigFromSp(SpManager.getInstance(this.getApplicationContext(), Contants.SP_FILE_CONFIG));
+        }
+        boolean b = needTransfer(smsBean);
+        Log.i("result", "need transfer is "+b);
+        if (b) {
+            Observable.create(new ObservableOnSubscribe<Sms>() {
+                @Override
+                public void subscribe(ObservableEmitter<Sms> e) throws Exception {
+                    if(!PhoneUtils.checkSIM(getApplicationContext())){
+                        e.onError(new Throwable("no sim"));
+                    }else {
+                        if (!BuildConfig.DEBUG){
+                            PhoneUtils.sendSMS(getApplicationContext(), mConfigBean.getTransferNumber(), smsBean.getContent());
+                        }
+                        if (mSmsDao == null) {
+                            mSmsDao = new MySmsDaoImpl();
+                        }
+                        mIds.push(mSmsDao.insertSms(smsBean));
+                        e.onNext(smsBean);
+                        e.onComplete();
+                    }
+                }
+            })
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Consumer<Sms>() {
+                        @Override
+                        public void accept(Sms sms) throws Exception {
+                            HomeActivity.sendUpdateSmsBroadcast(getApplicationContext(), sms);
+                            if (BuildConfig.DEBUG){
+                                //TODO 手动发送接收到结果的广播
+                                startService(SmsService.getSendSmsResultIntent(getApplicationContext(), true));
+                            }
+                        }
+                    });
+        }
+    }
+
     private boolean needTransfer(Sms smsBean) {
         if (!mConfigBean.isTransferOn()) {
             return false;
         }
-        if (mConfigBean.isRgxNumberOn() && mConfigBean.getRgxNumber().contains(smsBean.getNumber())) {
-            return true;
-        } else if (mConfigBean.isRgxContentOn() && smsBean.getContent().contains(mConfigBean.getRgxContent())) {
+        if (mConfigBean.getGroup() == -1){
             return true;
         }
-        return false;
+        boolean isRgxNumber = false;
+        if (mConfigBean.isRgxNumberOn() && mConfigBean.getRgxNumber().contains(smsBean.getNumber())) {
+            isRgxNumber = true;
+        }
+        //0是or, 1是And
+        return mConfigBean.getGroup() == 0 ||
+                isRgxNumber && mConfigBean.isRgxContentOn()
+                        && smsBean.getContent().contains(mConfigBean.getRgxContent());
     }
 
     public SmsService() {

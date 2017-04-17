@@ -5,7 +5,7 @@ import com.jkdroid.smstransfer.BaseApplication;
 import java.util.List;
 
 /**
- * 
+ *
  * Created by alan on 2017/4/15.
  */
 
@@ -15,7 +15,8 @@ public class MySmsDaoImpl implements MySmsDao {
         return BaseApplication.getDaoInstant().getSmsDao()
                 .queryBuilder()
                 .offset(start)
-                .limit(limit).list();
+                .limit(limit)
+                .list();
     }
 
     @Override
@@ -36,6 +37,12 @@ public class MySmsDaoImpl implements MySmsDao {
     @Override
     public void insertOrUpdateSms(Sms sms) {
         BaseApplication.getDaoInstant().getSmsDao()
-                .insert(sms);
+                .insertOrReplace(sms);
+    }
+
+    @Override
+    public long count() {
+        return BaseApplication.getDaoInstant().getSmsDao()
+                .count();
     }
 }

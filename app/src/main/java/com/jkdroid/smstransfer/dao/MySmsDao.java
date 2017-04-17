@@ -15,4 +15,6 @@ public interface MySmsDao {
     Sms querySmsById(long id);
 
     void insertOrUpdateSms(Sms sms);
+
+    long count();
 }

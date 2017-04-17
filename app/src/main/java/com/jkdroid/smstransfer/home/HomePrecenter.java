@@ -17,7 +17,7 @@ class HomePrecenter implements HomeContracts.Precenter, HomeContracts.Interactor
     private HomeContracts.View mView;
     private HomeContracts.Router mRouter;
     private final HomeContracts.Interactor mInteractor;
-    private final ArrayList<Sms> mSmsList = new ArrayList<>();
+    private List<Sms> mSmsList = new ArrayList<>();
     HomePrecenter(HomeContracts.View view) {
         this.mView = view;
         this.mRouter = new HomeRouter(mView.getActivity());
@@ -42,12 +42,7 @@ class HomePrecenter implements HomeContracts.Precenter, HomeContracts.Interactor
     @Override
     public void onResume() {
         mInteractor.getConfigBean(SpManager.getInstance(mView.getActivity().getApplicationContext(), Contants.SP_FILE_CONFIG));
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                mInteractor.getCurrentSms(0, 10);
-            }
-        }).start();
+        mInteractor.getLastestSmses(10);
         mView.registFontReceiver();
     }
 
@@ -57,10 +52,11 @@ class HomePrecenter implements HomeContracts.Precenter, HomeContracts.Interactor
     }
 
     @Override
-    public void onAutoTransferSmsSucceed(Sms bean) {
+    public void onReceiveNewSms(Sms bean) {
         //把这条信息插入到当前的数组
-        mSmsList.add(bean);
-        mView.updateList(bean, mSmsList);
+        boolean remove = mSmsList.remove(bean);
+        mSmsList.add(0, bean);
+        mView.updateList(remove ? null : bean, mSmsList);
     }
 
     @Override
@@ -70,6 +66,7 @@ class HomePrecenter implements HomeContracts.Precenter, HomeContracts.Interactor
 
     @Override
     public void onGetCurrentSmsFinished(List<Sms> smses) {
+        mSmsList = smses;
         mView.updateList(null, smses);
     }
 }

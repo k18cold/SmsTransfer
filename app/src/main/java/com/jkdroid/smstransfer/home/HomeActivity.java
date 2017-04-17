@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -76,7 +77,7 @@ public class HomeActivity extends MyActivity implements HomeContracts.View {
             public void onReceive(Context context, Intent intent) {
                 //TODO 插入当前的数组中,并写入到数据库
                 Sms bean = Sms.getByIntent(intent);
-                mPrecenter.onAutoTransferSmsSucceed(bean);
+                mPrecenter.onReceiveNewSms(bean);
             }
         };
         IntentFilter filter = new IntentFilter(ACTION_AUTO_SEND_MSG);
@@ -91,8 +92,15 @@ public class HomeActivity extends MyActivity implements HomeContracts.View {
 
     @Override
     public void updateList(Sms bean, List<Sms> smsList) {
-        mAdapter.updateData(smsList);
-        mAdapter.notifyDataSetChanged();
+        if (bean != null){
+            mAdapter.notifyItemInserted(0);
+            Log.i("result", "notifyItemInserted "+bean.getContent());
+        }else {
+            mAdapter.updateData(smsList);
+            mAdapter.notifyDataSetChanged();
+            Log.i("result", "notifyDataSetChanged");
+        }
+        mRv.scrollToPosition(0);
     }
 
     @Override
@@ -116,6 +124,7 @@ public class HomeActivity extends MyActivity implements HomeContracts.View {
 
     public static void sendUpdateSmsBroadcast(Context context, Sms sms) {
         Intent intent = sms.toIntent();
+        intent.setAction(ACTION_AUTO_SEND_MSG);
         context.sendBroadcast(intent);
     }
 

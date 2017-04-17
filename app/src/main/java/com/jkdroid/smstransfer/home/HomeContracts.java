@@ -24,7 +24,7 @@ class HomeContracts {
 
         void onPause();
 
-        void onAutoTransferSmsSucceed(Sms bean);
+        void onReceiveNewSms(Sms bean);
     }
 
     public interface View{
@@ -48,6 +48,8 @@ class HomeContracts {
         void getConfigBean(SpManager config);
 
         void getCurrentSms(int start, int limit);
+
+        void getLastestSmses(int limit);
     }
 
     interface InteractorOutpeut{

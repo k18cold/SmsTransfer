@@ -17,6 +17,16 @@ public class ConfigBean implements Parcelable{
     private String rgxNumber;
     private String rgxContent;
 
+    private int group;
+
+    public int getGroup() {
+        return group;
+    }
+
+    public void setGroup(int group) {
+        this.group = group;
+    }
+
     public void setTransferOn(boolean transferOn) {
         this.transferOn = transferOn;
     }
@@ -65,6 +75,9 @@ public class ConfigBean implements Parcelable{
         return rgxContent;
     }
 
+    public ConfigBean() {
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -78,9 +91,7 @@ public class ConfigBean implements Parcelable{
         dest.writeString(this.transferNumber);
         dest.writeString(this.rgxNumber);
         dest.writeString(this.rgxContent);
-    }
-
-    public ConfigBean() {
+        dest.writeInt(this.group);
     }
 
     protected ConfigBean(Parcel in) {
@@ -90,6 +101,7 @@ public class ConfigBean implements Parcelable{
         this.transferNumber = in.readString();
         this.rgxNumber = in.readString();
         this.rgxContent = in.readString();
+        this.group = in.readInt();
     }
 
     public static final Creator<ConfigBean> CREATOR = new Creator<ConfigBean>() {
