@@ -65,7 +65,7 @@
             android:layout_width="@dimen/et_width"
             android:maxLines="1"
             android:inputType="phone"
-            android:maxLength="16"
+            android:maxLength="22"
             android:layout_toRightOf="@id/cb_number"
             android:layout_toEndOf="@id/cb_number"
             android:layout_height="wrap_content"/>

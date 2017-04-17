@@ -7,7 +7,7 @@ import android.view.Window;
 import android.widget.CheckBox;
 import android.widget.EditText;
 
-import com.jkdroid.core.BaseActivity;
+import com.jkdroid.smstransfer.MyActivity;
 import com.jkdroid.smstransfer.R;
 import com.jkdroid.smstransfer.bean.ConfigBean;
 import com.jkdroid.smstransfer.view.bean.LayoutTitle;
@@ -17,7 +17,7 @@ import com.jkdroid.smstransfer.view.bean.LayoutTitle;
  * Created by alan on 2017/4/11.
  */
 
-public class SettingsActivity extends BaseActivity implements SettingsContracts.View{
+public class SettingsActivity extends MyActivity implements SettingsContracts.View{
     private LayoutTitle mLayoutTitle;
 
     CheckBox mCbAutoTransfer;

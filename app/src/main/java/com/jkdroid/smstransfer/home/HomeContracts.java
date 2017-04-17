@@ -4,6 +4,9 @@ import android.app.Activity;
 
 import com.jkdroid.core.manager.SpManager;
 import com.jkdroid.smstransfer.bean.ConfigBean;
+import com.jkdroid.smstransfer.dao.Sms;
+
+import java.util.List;
 
 /**
  *
@@ -18,11 +21,20 @@ class HomeContracts {
         void onDestroy();
 
         void onResume();
+
+        void onPause();
+
+        void onAutoTransferSmsSucceed(Sms bean);
     }
 
     public interface View{
         Activity getActivity();
-        void toast(String msg);
+
+        void registFontReceiver();
+
+        void unregistFontReceiver();
+
+        void updateList(Sms bean, List<Sms> smsList);
     }
 
     interface Router{
@@ -34,10 +46,14 @@ class HomeContracts {
     interface Interactor{
 
         void getConfigBean(SpManager config);
+
+        void getCurrentSms(int start, int limit);
     }
 
     interface InteractorOutpeut{
 
         void ongetConfigBeanFinished(ConfigBean intent);
+
+        void onGetCurrentSmsFinished(List<Sms> smses);
     }
 }

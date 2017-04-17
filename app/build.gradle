@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'org.greenrobot.greendao' // apply plugin
 
 android {
     compileSdkVersion 25
@@ -11,11 +12,25 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
+    signingConfigs {
+        release {
+            storeFile file("store.jks")
+            keyAlias "key0"
+            storePassword "123456"
+            keyPassword "123456"
+        }
+    }
     buildTypes {
         release {
+            signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+
+    greendao {
+        //版本号，升级时可配置
+        schemaVersion 4
     }
 }
 
@@ -34,4 +49,6 @@ dependencies {
     compile 'com.jkdroid:maya-lib:1.2.0'
     compile 'com.jakewharton:butterknife:8.2.1'
     compile 'com.android.support:design:25.3.1'
+    compile 'org.greenrobot:greendao:3.2.2'
+    // add library
 }

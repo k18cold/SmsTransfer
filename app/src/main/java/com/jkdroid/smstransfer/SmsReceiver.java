@@ -10,6 +10,8 @@ import android.telephony.SmsMessage;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.jkdroid.smstransfer.dao.Sms;
+
 /**
  *
  * Created by guanzhihao on 2016/2/16.
@@ -33,6 +35,7 @@ public class SmsReceiver extends BroadcastReceiver {
                 default:
                     break;
             }
+
             context.startService(SmsService.getSendSmsResultIntent(context, result));
         }else {
             Log.i("mession", "sms--检测收到短信");
@@ -40,6 +43,7 @@ public class SmsReceiver extends BroadcastReceiver {
             SmsMessage msg;
             String number = "";
             String content = "";
+            long time = 0;
             if (null != bundle) {
                 Object[] smsObj = (Object[]) bundle.get("pdus");
                 if (smsObj == null){
@@ -50,6 +54,7 @@ public class SmsReceiver extends BroadcastReceiver {
                     msg = SmsMessage.createFromPdu((byte[]) object);
                     number = msg.getOriginatingAddress();
                     content += msg.getDisplayMessageBody();
+                    time = msg.getTimestampMillis();
 //                    Date date = new Date(msg.getTimestampMillis());//时间
 //                    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 //                    String receiveTime = format.format(date);
@@ -61,9 +66,8 @@ public class SmsReceiver extends BroadcastReceiver {
             if (!TextUtils.isEmpty(number) && !TextUtils.isEmpty(content)){
                 //有正常内容
                 Log.i("SmsReceiver", content);
-
-                context.startService(SmsService.getSmsIntent(context, number, content));
-//                context.startService(MessionService.getReceiveSmsIntent(context, number, content));
+                Intent it = SmsService.toIntent(new Sms(number, content, time));
+                context.startService(SmsService.getSmsReceiveIntent(context, it));
             }
         }
     }

@@ -3,6 +3,11 @@ package com.jkdroid.smstransfer.home;
 import com.jkdroid.core.manager.SpManager;
 import com.jkdroid.smstransfer.bean.ConfigBean;
 import com.jkdroid.smstransfer.bean.Contants;
+import com.jkdroid.smstransfer.dao.MySmsDao;
+import com.jkdroid.smstransfer.dao.MySmsDaoImpl;
+import com.jkdroid.smstransfer.dao.Sms;
+
+import java.util.List;
 
 /**
  *
@@ -10,10 +15,12 @@ import com.jkdroid.smstransfer.bean.Contants;
  */
 
 class HomeInteractor implements HomeContracts.Interactor {
-    private final HomeContracts.InteractorOutpeut mOutpeut;
 
+    private final HomeContracts.InteractorOutpeut mOutpeut;
+    private MySmsDao mSmsDao;
     HomeInteractor(HomeContracts.InteractorOutpeut outpeut) {
         this.mOutpeut = outpeut;
+        mSmsDao = new MySmsDaoImpl();
     }
 
     @Override
@@ -35,5 +42,11 @@ class HomeInteractor implements HomeContracts.Interactor {
         bean.setRgxContent(fc);
 
         this.mOutpeut.ongetConfigBeanFinished(bean);
+    }
+
+    @Override
+    public void getCurrentSms(int start, int limit) {
+        List<Sms> smses = mSmsDao.querySmsLimit(start, limit);
+        mOutpeut.onGetCurrentSmsFinished(smses);
     }
 }
